@@ -12,6 +12,10 @@ import javax.jws.WebService;
 public class HelloWorldImpl implements HelloWorld {
 
     public String say(String str) {
-        return "Hello "+str;
+        return "Hello " + str;
+    }
+
+    public String PubServices(String inStr) {
+        return "Hello:" + inStr;
     }
 }
