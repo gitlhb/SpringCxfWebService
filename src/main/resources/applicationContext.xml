@@ -22,6 +22,6 @@
 	<!-- 定义服务提供者  -->
 	<jaxws:endpoint
 		implementor="#helloWorld"
-		address="/HelloWorld"
+		address="/spi"
 	 ></jaxws:endpoint>
 </beans>

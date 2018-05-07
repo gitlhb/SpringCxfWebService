@@ -20,6 +20,6 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>CXFServlet</servlet-name>
-    <url-pattern>/ws/*</url-pattern>
+    <url-pattern>/wd/*</url-pattern>
   </servlet-mapping>
 </web-app>
