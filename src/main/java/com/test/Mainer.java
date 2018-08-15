@@ -15,6 +15,7 @@ import java.util.*;
  */
 public class Mainer {
     public static final String KEY = "BD6061593FEB11AB";
+    public static final String USER_ID = "DYYSSXM_WX";
 
     public static void main(String[] args) {
         try {
@@ -41,9 +42,9 @@ public class Mainer {
 
             RequestRoot requestRoot = new RequestRoot();
             requestRoot.setFUN_CODE("1020");
-            requestRoot.setUSER_ID("DYYSSXM_WX");
+            requestRoot.setUSER_ID(USER_ID);
             requestRoot.setREQ_ENCRYPTED(encryptReq);
-            SortedMap<String, String>  signMap = sortMapByKey(object2Map(requestRoot), Boolean.TRUE);
+            SortedMap<String, String> signMap = sortMapByKey(object2Map(requestRoot), Boolean.TRUE);
             requestRoot.setSIGN(createSign(signMap, KEY));
             requestRoot.setSIGN_TYPE("MD5");
             //得到发送的报文
