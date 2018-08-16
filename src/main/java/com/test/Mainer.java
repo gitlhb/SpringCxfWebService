@@ -37,7 +37,7 @@ public class Mainer {
             getInPatientInfoRequest.setPATIENT_INFO(list);
 
             String xml = XmlHelper.toXml(getInPatientInfoRequest, GetInPatientInfoRequest.class);
-
+            System.out.println("请求之前的明文：" + xml);
             String encryptReq = encrypt(KEY, xml);
 
             RequestRoot requestRoot = new RequestRoot();
@@ -53,11 +53,17 @@ public class Mainer {
             String out = WebServiceHelper.invokeWebService(url, ServiceMethodName.UserService.name(), inParam);
             //获取返回的数据
             ResponseRoot responseRoot = XmlHelper.toBean(out, ResponseRoot.class);
-            if (responseRoot.getRETURN_CODE() == 0) {
-                String response = decrypt(KEY, responseRoot.getRES_ENCRYPTED());
-                System.out.println(response);
+            if (checkSign(responseRoot, KEY)) {
+                if (responseRoot.getRETURN_CODE() == 0) {
+                    String response = decrypt(KEY, responseRoot.getRES_ENCRYPTED());
+                    GetInPatientInfoResponse getInPatientInfoResponse = XmlHelper.toBean(response, GetInPatientInfoResponse.class);
+                    System.out.println("住院号:" + getInPatientInfoResponse.getPATIENT_NO());
+                    System.out.println(XmlHelper.toXml(getInPatientInfoResponse, GetInPatientInfoResponse.class));
+                } else {
+                    System.out.println("HIS执行错误:错误码-》:" + responseRoot.getRETURN_CODE() + "->" + responseRoot.getRETURN_MSG());
+                }
             } else {
-                System.out.println("HIS执行错误:错误码-》:" + responseRoot.getRETURN_CODE() + "->" + responseRoot.getRETURN_MSG());
+                System.out.println("签名错误。。。");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -135,6 +141,30 @@ public class Mainer {
         sb.append("KEY=" + API_KEY);
         String sign = MD5Util.MD5Encode(sb.toString(), "utf-8").toUpperCase();
         return sign;
+    }
+
+    /**
+     * 验证调用接口返回的签名
+     * @param responseRoot 返回的实体
+     * @param API_KEY 密钥
+     * @return FALSE:签名不正确 TRUE:签名正确
+     */
+    public static boolean checkSign(ResponseRoot responseRoot, String API_KEY) {
+        SortedMap<String, String> packageParams = sortMapByKey(object2Map(responseRoot), Boolean.TRUE);
+        StringBuffer sb = new StringBuffer();
+        Set es = packageParams.entrySet();
+        Iterator it = es.iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String k = (String) entry.getKey().toString();
+            String v = (String) entry.getValue().toString();
+            if (null != v && !"".equals(v) && !"SIGN".equals(k) && !"SIGN_TYPE".equals(k)) {
+                sb.append(k + "=" + v + "&");
+            }
+        }
+        sb.append("KEY=" + API_KEY);
+        String sign = MD5Util.MD5Encode(sb.toString(), "utf-8").toUpperCase();
+        return sign.equals(responseRoot.getSIGN());
     }
 
     /**
