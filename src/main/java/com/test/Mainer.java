@@ -58,6 +58,9 @@ public class Mainer {
                     String response = decrypt(KEY, responseRoot.getRES_ENCRYPTED());
                     GetInPatientInfoResponse getInPatientInfoResponse = XmlHelper.toBean(response, GetInPatientInfoResponse.class);
                     System.out.println("住院号:" + getInPatientInfoResponse.getPATIENT_NO());
+                    System.out.println("住院预交金:" +Double.parseDouble(getInPatientInfoResponse.getPREPAID_AMOUNT())/100);
+                    System.out.println("住院账户余额:" + getInPatientInfoResponse.getBALANCE()/100);
+                    System.out.println("住院总费用:" +Double.parseDouble(getInPatientInfoResponse.getTOTAL_AMOUNT())/100);
                     System.out.println(XmlHelper.toXml(getInPatientInfoResponse, GetInPatientInfoResponse.class));
                 } else {
                     System.out.println("HIS执行错误:错误码-》:" + responseRoot.getRETURN_CODE() + "->" + responseRoot.getRETURN_MSG());
@@ -164,7 +167,7 @@ public class Mainer {
         }
         sb.append("KEY=" + API_KEY);
         String sign = MD5Util.MD5Encode(sb.toString(), "utf-8").toUpperCase();
-        return sign.equals(responseRoot.getSIGN());
+        return sign.equals(responseRoot.getSIGN().toUpperCase());
     }
 
     /**
