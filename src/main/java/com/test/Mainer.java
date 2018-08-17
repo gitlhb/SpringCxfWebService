@@ -36,6 +36,11 @@ public class Mainer {
             patientInfo.setBIRTHDAY("1990-01-01");
             List<PatientInfo> list = new ArrayList<PatientInfo>();
             list.add(patientInfo);
+
+            PatientInfo[] arr=new PatientInfo[list.size()];
+            list.toArray(arr);
+
+
             GetInPatientInfoRequest getInPatientInfoRequest = new GetInPatientInfoRequest();
             getInPatientInfoRequest.setHOS_ID("510603001");
             getInPatientInfoRequest.setPATIENT_INFO(list);
