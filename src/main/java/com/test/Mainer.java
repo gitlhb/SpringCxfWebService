@@ -6,9 +6,11 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.util.*;
+
 
 /**
  * Created by liuhongbing on 2018/3/22.
@@ -16,6 +18,8 @@ import java.util.*;
 public class Mainer {
     public static final String KEY = "BD6061593FEB11AB";
     public static final String USER_ID = "DYYSSXM_WX";
+    public static final Logger log = Logger.getLogger(Mainer.class);
+
 
     public static void main(String[] args) {
         try {
@@ -37,7 +41,7 @@ public class Mainer {
             getInPatientInfoRequest.setPATIENT_INFO(list);
 
             String xml = XmlHelper.toXml(getInPatientInfoRequest, GetInPatientInfoRequest.class);
-            System.out.println("请求之前的明文：" + xml);
+            log.info("发送的明文信息:" + xml);
             String encryptReq = encrypt(KEY, xml);
 
             RequestRoot requestRoot = new RequestRoot();
@@ -49,8 +53,10 @@ public class Mainer {
             requestRoot.setSIGN_TYPE("MD5");
             //得到发送的报文
             String inParam = XmlHelper.toXml(requestRoot, RequestRoot.class);
+            log.info("发送的密文信息:" + inParam);
             String url = "http://218.6.146.70:8889/SpiService.asmx";
             String out = WebServiceHelper.invokeWebService(url, ServiceMethodName.UserService.name(), inParam);
+            log.info("得到返回的密文信息:" + out);
             //获取返回的数据
             ResponseRoot responseRoot = XmlHelper.toBean(out, ResponseRoot.class);
             if (checkSign(responseRoot, KEY)) {
@@ -58,18 +64,20 @@ public class Mainer {
                     String response = decrypt(KEY, responseRoot.getRES_ENCRYPTED());
                     GetInPatientInfoResponse getInPatientInfoResponse = XmlHelper.toBean(response, GetInPatientInfoResponse.class);
                     System.out.println("住院号:" + getInPatientInfoResponse.getPATIENT_NO());
-                    System.out.println("住院预交金:" +Double.parseDouble(getInPatientInfoResponse.getPREPAID_AMOUNT())/100);
-                    System.out.println("住院账户余额:" + getInPatientInfoResponse.getBALANCE()/100);
-                    System.out.println("住院总费用:" +Double.parseDouble(getInPatientInfoResponse.getTOTAL_AMOUNT())/100);
-                    System.out.println(XmlHelper.toXml(getInPatientInfoResponse, GetInPatientInfoResponse.class));
+                    System.out.println("住院预交金:" + Double.parseDouble(getInPatientInfoResponse.getPREPAID_AMOUNT()) / 100);
+                    System.out.println("住院账户余额:" + getInPatientInfoResponse.getBALANCE() / 100);
+                    System.out.println("住院总费用:" + Double.parseDouble(getInPatientInfoResponse.getTOTAL_AMOUNT()) / 100);
+                    //System.out.println();
+                    log.info("返回的明文信息:" + XmlHelper.toXml(getInPatientInfoResponse, GetInPatientInfoResponse.class));
                 } else {
                     System.out.println("HIS执行错误:错误码-》:" + responseRoot.getRETURN_CODE() + "->" + responseRoot.getRETURN_MSG());
                 }
             } else {
-                System.out.println("签名错误。。。");
+                System.out.println("返回的数据格式签名错误!");
             }
         } catch (Exception e) {
             e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
@@ -148,8 +156,9 @@ public class Mainer {
 
     /**
      * 验证调用接口返回的签名
+     *
      * @param responseRoot 返回的实体
-     * @param API_KEY 密钥
+     * @param API_KEY      密钥
      * @return FALSE:签名不正确 TRUE:签名正确
      */
     public static boolean checkSign(ResponseRoot responseRoot, String API_KEY) {
