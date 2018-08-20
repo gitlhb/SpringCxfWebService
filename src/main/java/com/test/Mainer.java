@@ -37,9 +37,8 @@ public class Mainer {
             List<PatientInfo> list = new ArrayList<PatientInfo>();
             list.add(patientInfo);
 
-            PatientInfo[] arr=new PatientInfo[list.size()];
+            PatientInfo[] arr = new PatientInfo[list.size()];
             list.toArray(arr);
-
 
             GetInPatientInfoRequest getInPatientInfoRequest = new GetInPatientInfoRequest();
             getInPatientInfoRequest.setHOS_ID("510603001");
@@ -144,15 +143,14 @@ public class Mainer {
      */
     public static String createSign(SortedMap<String, String> packageParams, String API_KEY) {
         StringBuffer sb = new StringBuffer();
-        Set es = packageParams.entrySet();
-        Iterator it = es.iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            String k = (String) entry.getKey().toString();
-            String v = (String) entry.getValue().toString();
-            if (null != v && !"".equals(v) && !"SIGN".equals(k) && !"SIGN_TYPE".equals(k)) {
+        for (Map.Entry<String, String> entry : packageParams.entrySet()
+                ) {
+            String k = entry.getKey();
+            String v = entry.getValue();
+            if ((k != null && k != "") && (v != null && v != "") & k != "SIGN" & k != "SIGN_TYPE") {
                 sb.append(k + "=" + v + "&");
             }
+
         }
         sb.append("KEY=" + API_KEY);
         String sign = MD5Util.MD5Encode(sb.toString(), "utf-8").toUpperCase();
